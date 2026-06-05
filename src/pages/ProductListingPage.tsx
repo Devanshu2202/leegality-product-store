@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Product } from "../types/product";
 import { getProducts } from "../api/productApi";
+import ProductCard from "../components/ProductCard";
 
 const ProductListingPage = () => {
     const [products, setProducts] = useState<Product[]>([]);
@@ -45,9 +46,12 @@ const ProductListingPage = () => {
                 Product Listing Page
             </h1>
 
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {products.map((product) => (
-                    <p key={product.id}>{product.title}</p>
+                    <ProductCard
+                        key={product.id}
+                        product={product}
+                    />
                 ))}
             </div>
         </div>
