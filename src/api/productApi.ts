@@ -3,7 +3,7 @@
 
 export const getProducts = async () => {
     const response = await fetch(
-        "https://dummyjson.com/products"
+        "https://dummyjson.com/products?limit=30&skip=0"
     );
 
     if (!response.ok) {

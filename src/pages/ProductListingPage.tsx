@@ -18,8 +18,21 @@ const ProductListingPage = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState("");
 
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const PRODUCTS_PER_PAGE = 12;
+
     const [minPrice, setMinPrice] = useState("");
     const [maxPrice, setMaxPrice] = useState("");
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [
+        selectedCategory,
+        selectedBrand,
+        minPrice,
+        maxPrice,
+    ]);
 
     useEffect(() => {
         if (!selectedCategory) {
@@ -93,6 +106,7 @@ const ProductListingPage = () => {
     }
 
     const filteredProducts = products.filter(
+
         (product) => {
             const brandMatch =
                 !selectedBrand ||
@@ -112,6 +126,20 @@ const ProductListingPage = () => {
                 maxPriceMatch
             );
         }
+    );
+
+    const startIndex =
+        (currentPage - 1) * PRODUCTS_PER_PAGE;
+
+    const paginatedProducts =
+        filteredProducts.slice(
+            startIndex,
+            startIndex + PRODUCTS_PER_PAGE
+        );
+
+    const totalPages = Math.ceil(
+        filteredProducts.length /
+        PRODUCTS_PER_PAGE
     );
 
     const brands = [...new Set(products.map((product) => product.brand))];
@@ -194,12 +222,38 @@ const ProductListingPage = () => {
 
                 <main className="flex-1">
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {filteredProducts.map((product) => (
+                        {paginatedProducts.map((product) => (
                             <ProductCard
                                 key={product.id}
                                 product={product}
                             />
                         ))}
+                    </div>
+
+                    <div className="mt-8 flex items-center justify-center gap-4">
+                        <button
+                            disabled={currentPage === 1}
+                            onClick={() =>
+                                setCurrentPage((prev) => prev - 1)
+                            }
+                            className="rounded border px-4 py-2"
+                        >
+                            Previous
+                        </button>
+
+                        <span>
+                            Page {currentPage} of {totalPages}
+                        </span>
+
+                        <button
+                            disabled={currentPage === totalPages}
+                            onClick={() =>
+                                setCurrentPage((prev) => prev + 1)
+                            }
+                            className="rounded border px-4 py-2"
+                        >
+                            Next
+                        </button>
                     </div>
                 </main>
             </div>
