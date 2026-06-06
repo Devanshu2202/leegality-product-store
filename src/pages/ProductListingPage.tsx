@@ -14,11 +14,7 @@ const ProductListingPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // const [selectedCategory, setSelectedCategory] = useState("");
-    // const [selectedBrand, setSelectedBrand] = useState("");
-
-    // const [minPrice, setMinPrice] = useState("");
-    // const [maxPrice, setMaxPrice] = useState("");
+    const [selectedBrand, setSelectedBrand] = useState("");
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState("");
 
@@ -71,15 +67,21 @@ const ProductListingPage = () => {
     }
 
     const filteredProducts = products.filter((product) => {
-        if (!selectedCategory) {
-            return true;
-        }
+        const categoryMatch =
+            !selectedCategory ||
+            product.category === selectedCategory;
 
-        return product.category === selectedCategory;
+        const brandMatch =
+            !selectedBrand ||
+            product.brand === selectedBrand;
+
+        return categoryMatch && brandMatch;
     });
 
+    const brands = [...new Set(products.map((product) => product.brand))];
+
     return (
-        <div className="p-6">
+        <div className="p-6 ">
             <h1 className="mb-4 text-3xl font-bold">
                 Product Listing Page
             </h1>
@@ -96,6 +98,19 @@ const ProductListingPage = () => {
                         value={category.slug}
                     >
                         {category.name}
+                    </option>
+                ))}
+            </select>
+
+            <select
+                value={selectedBrand}
+                onChange={(e) => setSelectedBrand(e.target.value)}
+            >
+                <option value="">All Brands</option>
+
+                {brands.map((brand) => (
+                    <option key={brand} value={brand}>
+                        {brand}
                     </option>
                 ))}
             </select>
