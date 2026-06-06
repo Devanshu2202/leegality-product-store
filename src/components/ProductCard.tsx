@@ -1,12 +1,19 @@
 import type { Product } from "../types/product";
+import { useNavigate } from "react-router-dom";
 
 interface ProductCardProps {
     product: Product;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
+    const navigate = useNavigate();
+
+
     return (
-        <div className="rounded-lg border p-4 shadow-sm">
+        <div
+            onClick={() => navigate(`/product/${product.id}`)}
+            className="cursor-pointer rounded-lg border p-4 shadow-sm"
+        >
             <img
                 src={product.thumbnail}
                 alt={product.title}
