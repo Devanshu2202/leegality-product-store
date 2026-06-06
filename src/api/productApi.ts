@@ -36,3 +36,19 @@ export const getCategories = async () => {
 
     return response.json();
 };
+
+export const getProductsByCategory = async (
+    category: string
+) => {
+    const response = await fetch(
+        `https://dummyjson.com/products/category/${category}`
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            "Failed to fetch category products"
+        );
+    }
+
+    return response.json();
+};

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Product } from "../types/product";
-import { getProducts, getCategories } from "../api/productApi";
+import { getProducts, getCategories, getProductsByCategory } from "../api/productApi";
 import ProductCard from "../components/ProductCard";
 
 type Category = {
@@ -18,9 +18,35 @@ const ProductListingPage = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState("");
 
+    const [minPrice, setMinPrice] = useState("");
+    const [maxPrice, setMaxPrice] = useState("");
+
     useEffect(() => {
-        fetchProducts();
-    }, []);
+        if (!selectedCategory) {
+            fetchProducts();
+        } else {
+            fetchProductsByCategoryHandler(selectedCategory);
+        }
+    }, [selectedCategory]);
+
+    const fetchProductsByCategoryHandler = async (
+        category: string
+    ) => {
+        try {
+            setLoading(true);
+            setError("");
+
+            const data =
+                await getProductsByCategory(category);
+
+            setProducts(data.products);
+        } catch (err) {
+            setError("Failed to fetch products");
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         fetchCategories();
@@ -66,17 +92,27 @@ const ProductListingPage = () => {
         return <h2>{error}</h2>;
     }
 
-    const filteredProducts = products.filter((product) => {
-        const categoryMatch =
-            !selectedCategory ||
-            product.category === selectedCategory;
+    const filteredProducts = products.filter(
+        (product) => {
+            const brandMatch =
+                !selectedBrand ||
+                product.brand === selectedBrand;
 
-        const brandMatch =
-            !selectedBrand ||
-            product.brand === selectedBrand;
+            const minPriceMatch =
+                !minPrice ||
+                product.price >= Number(minPrice);
 
-        return categoryMatch && brandMatch;
-    });
+            const maxPriceMatch =
+                !maxPrice ||
+                product.price <= Number(maxPrice);
+
+            return (
+                brandMatch &&
+                minPriceMatch &&
+                maxPriceMatch
+            );
+        }
+    );
 
     const brands = [...new Set(products.map((product) => product.brand))];
 
@@ -86,42 +122,86 @@ const ProductListingPage = () => {
                 Product Listing Page
             </h1>
 
-            <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-                <option value="">All Categories</option>
 
-                {categories.map((category) => (
-                    <option
-                        key={category.slug}
-                        value={category.slug}
-                    >
-                        {category.name}
-                    </option>
-                ))}
-            </select>
 
-            <select
-                value={selectedBrand}
-                onChange={(e) => setSelectedBrand(e.target.value)}
-            >
-                <option value="">All Brands</option>
+            <div className="flex gap-6">
+                <aside className="w-64 border rounded-lg p-4">
+                    <h2 className="mb-4 text-xl font-semibold">
+                        Filters
+                    </h2>
 
-                {brands.map((brand) => (
-                    <option key={brand} value={brand}>
-                        {brand}
-                    </option>
-                ))}
-            </select>
+                    <div className="space-y-4">
+                        <select
+                            className="w-full border p-2 rounded"
+                            value={selectedCategory}
+                            onChange={(e) =>
+                                setSelectedCategory(e.target.value)
+                            }
+                        >
+                            <option value="">
+                                All Categories
+                            </option>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {filteredProducts.map((product) => (
-                    <ProductCard
-                        key={product.id}
-                        product={product}
-                    />
-                ))}
+                            {categories.map((category) => (
+                                <option
+                                    key={category.slug}
+                                    value={category.slug}
+                                >
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
+
+                        <select
+                            className="w-full border p-2 rounded"
+                            value={selectedBrand}
+                            onChange={(e) =>
+                                setSelectedBrand(e.target.value)
+                            }
+                        >
+                            <option value="">
+                                All Brands
+                            </option>
+
+
+
+                            {brands.map((brand) => (
+                                <option
+                                    key={brand}
+                                    value={brand}
+                                >
+                                    {brand}
+                                </option>
+                            ))}
+                        </select>
+                        <input
+                            type="number"
+                            placeholder="Min Price"
+                            value={minPrice}
+                            onChange={(e) => setMinPrice(e.target.value)}
+                            className="w-full border p-2 rounded"
+                        />
+
+                        <input
+                            type="number"
+                            placeholder="Max Price"
+                            value={maxPrice}
+                            onChange={(e) => setMaxPrice(e.target.value)}
+                            className="w-full border p-2 rounded"
+                        />
+                    </div>
+                </aside>
+
+                <main className="flex-1">
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {filteredProducts.map((product) => (
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                            />
+                        ))}
+                    </div>
+                </main>
             </div>
         </div>
     );
